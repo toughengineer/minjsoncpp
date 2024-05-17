@@ -1,0 +1,3 @@
+{"some":"thing"}
+{"foo":17,"bar":false,"baz":true}
+{"may":{"include":"nested","objects":["and","arrays"]}}

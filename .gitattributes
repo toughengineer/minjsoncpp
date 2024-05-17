@@ -1,0 +1,2 @@
+# This sets the default behaviour, overriding core.autocrlf
+* text=auto eol=lf

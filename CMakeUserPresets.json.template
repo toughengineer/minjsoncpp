@@ -1,0 +1,59 @@
+﻿{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "linux",
+      "hidden": true,
+      "inherits": [ "tests", "examples" ],
+      "vendor": {
+        "microsoft.com/VisualStudioRemoteSettings/CMake/1.0": {
+          "sourceDir": !this is intentionally invalid! put here the path to sources inside linux,
+          "copySources": false
+        }
+      }
+    },
+    {
+      "name": "gcc-release-linux",
+      "displayName": "gcc Release",
+      "inherits": [ "linux-gcc", "linux", "relwithdebinfo" ]
+    },
+    {
+      "name": "clang-release-linux",
+      "displayName": "clang Release",
+      "inherits": [ "linux-clang", "linux", "relwithdebinfo" ]
+    },
+    {
+      "name": "clang-release-linux-libc++",
+      "displayName": "clang Release libc++",
+      "inherits": [ "linux-clang-libc++", "linux", "relwithdebinfo" ]
+    },
+    {
+      "name": "msvc-x64",
+      "hidden": true,
+      "inherits": [ "tests", "examples" ],
+      "architecture": {
+        "value": "x64",
+        "strategy": "external"
+      },
+      "toolset": {
+        "value": "host=x64",
+        "strategy": "external"
+      }
+    },
+    {
+      "name": "x64-release",
+      "displayName": "x64 Release",
+      "inherits": [ "msvc", "msvc-x64", "relwithdebinfo" ]
+    },
+    {
+      "name": "clang-cl-x64-release",
+      "displayName": "clang-cl x64 Release",
+      "inherits": [ "msvc-clang-cl", "msvc-x64", "relwithdebinfo" ]
+    },
+    {
+      "name": "clang-x64-release",
+      "displayName": "clang x64 Release",
+      "inherits": [ "msvc-clang", "msvc-x64", "relwithdebinfo" ]
+    }
+  ]
+}

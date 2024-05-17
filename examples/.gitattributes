@@ -1,0 +1,3 @@
+# Keep crlf
+ndjson.txt eol=crlf
+*.json eol=crlf
