@@ -33,7 +33,7 @@ TEST_CASE("escape valid UTF-8 strings", "[escape][serialize]") {
       pair{ "line feed \n character"sv, "line feed \\n character"sv },
       pair{ "whatever this \xf character is"sv, "whatever this \\u000f character is"sv },
       pair{ "quotation mark \" character"sv, "quotation mark \\\" character"sv },
-      pair{ "revers solidus \\ character"sv, "revers solidus \\\\ character"sv });
+      pair{ "reverse solidus \\ character"sv, "reverse solidus \\\\ character"sv });
     // clang-format on
     CAPTURE(string, escapedString);
 
@@ -65,7 +65,7 @@ TEST_CASE("escape valid UTF-8 strings", "[escape][serialize]") {
       pair{ "\" character"sv, "\\\" character"sv },
       pair{ "\""sv, "\\\""sv },
 
-      pair{ "revers solidus \\"sv, "revers solidus \\\\"sv },
+      pair{ "reverse solidus \\"sv, "reverse solidus \\\\"sv },
       pair{ "\\ character is"sv, "\\\\ character is"sv },
       pair{ "\\"sv, "\\\\"sv });
     // clang-format on

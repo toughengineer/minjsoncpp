@@ -1,5 +1,5 @@
 #include <utility>  // dummy include to get _LIBCPP_VERSION
-// libc++ 14 or earlier does not provide <memory_resource>
+// libc++ version 15 and earlier does not provide <memory_resource>
 #if !defined(_LIBCPP_VERSION) || _LIBCPP_VERSION >= 160000
 #include <minjsoncpp.h>
 
@@ -96,4 +96,4 @@ TEST_CASE_METHOD(TestFixture, "parsing value using custom allocator", "[value][a
   REQUIRE(memoryResource.allocationCount == 0);
   REQUIRE(memoryResource.deallocationCount == 0);
 }
-#endif  // defined(_LIBCPP_VERSION) && _LIBCPP_VERSION < 160000
+#endif  // !defined(_LIBCPP_VERSION) || _LIBCPP_VERSION >= 160000
