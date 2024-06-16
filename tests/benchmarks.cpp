@@ -37,99 +37,113 @@ std::string loadFile(const std::string &filename) {
     throw std::runtime_error{ "failed to open " + filename };
   return { std::istreambuf_iterator<char>{ file }, std::istreambuf_iterator<char>{} };
 }
+
+const auto loremIpsum =
+  "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna "
+  "aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. "
+  "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur "
+  "sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."sv;
 }  // namespace
 
 TEST_CASE("escape benchmark (valid UTF-8 strings)", "[escape][!benchmark]") {
-  const auto string =
-    "some ASCII character to escape: \t \" \\ \n"
-    "utf8 2 byte code point \xC2\xA3 3 byte code point \xE2\x82\xAC 4 byte code point \xF0\x9F\x98\x80 characters"sv;
+  const auto [theString, name] = GENERATE(
+    std::pair{
+      "some ASCII character to escape: \t \" \\ \n"
+      "utf8 2 byte code point \xC2\xA3 3 byte code point \xE2\x82\xAC 4 byte code point \xF0\x9F\x98\x80 characters"sv,
+      "string with characters to escape" },
+    std::pair{ loremIpsum, "lorem ipsum" });
 
-  SECTION("default") {
-    BENCHMARK("string") {
-      return minjson::escape(string).size();
-    };
-    BENCHMARK("string /w reserve") {
-      StringSink sink{};
-      minjson::impl::escape(sink, string, {}, {}, {});
-      return sink.str.size();
-    };
-    BENCHMARK("dummy sink") {
-      DummySink sink;
-      minjson::impl::escape(sink, string, {}, {}, {});
-      return sink.size;
-    };
-    BENCHMARK("polymorphic dummy sink") {
-      DummySink sink;
-      minjson::impl::escape<PolymorphicSink>(sink, string, {}, {}, {});
-      return sink.size;
-    };
-  }
+  DYNAMIC_SECTION(name) {
+    const auto string = theString;  // BENCHMARK() macro does not support capturing structured bindings in C++17
 
-  SECTION("default, validate UTF-8") {
-    BENCHMARK("string") {
-      return minjson::escape(string, {}, minjson::Utf8Validation::FailOnInvalidUtf8CodeUnits).size();
-    };
-    BENCHMARK("string /w reserve") {
-      StringSink sink{};
-      minjson::impl::escape(sink, string, {}, minjson::Utf8Validation::FailOnInvalidUtf8CodeUnits, {});
-      return sink.str.size();
-    };
-    BENCHMARK("dummy sink") {
-      DummySink sink;
-      minjson::impl::escape(sink, string, {}, minjson::Utf8Validation::FailOnInvalidUtf8CodeUnits, {});
-      return sink.size;
-    };
-    BENCHMARK("polymorphic dummy sink") {
-      DummySink sink;
-      minjson::impl::escape<PolymorphicSink>(sink, string, {}, minjson::Utf8Validation::FailOnInvalidUtf8CodeUnits, {});
-      return sink.size;
-    };
-  }
+    SECTION("default") {
+      BENCHMARK("string") {
+        return minjson::escape(string).size();
+      };
+      BENCHMARK("string /w reserve") {
+        StringSink sink{};
+        minjson::impl::escape(sink, string, {}, {}, {});
+        return sink.str.size();
+      };
+      BENCHMARK("dummy sink") {
+        DummySink sink;
+        minjson::impl::escape(sink, string, {}, {}, {});
+        return sink.size;
+      };
+      BENCHMARK("polymorphic dummy sink") {
+        DummySink sink;
+        minjson::impl::escape<PolymorphicSink>(sink, string, {}, {}, {});
+        return sink.size;
+      };
+    }
 
-  SECTION("non-ASCII") {
-    BENCHMARK("string") {
-      return minjson::escape(string, minjson::Escape::NonAscii).size();
-    };
-    BENCHMARK("string /w reserve") {
-      StringSink sink{};
-      minjson::impl::escape(sink, string, minjson::Escape::NonAscii, {}, {});
-      return sink.str.size();
-    };
-    BENCHMARK("dummy sink") {
-      DummySink sink;
-      minjson::impl::escape(sink, string, minjson::Escape::NonAscii, {}, {});
-      return sink.size;
-    };
-    BENCHMARK("polymorphic dummy sink") {
-      DummySink sink;
-      minjson::impl::escape<PolymorphicSink>(sink, string, minjson::Escape::NonAscii, {}, {});
-      return sink.size;
-    };
-  }
+    SECTION("default, validate UTF-8") {
+      BENCHMARK("string") {
+        return minjson::escape(string, {}, minjson::Utf8Validation::FailOnInvalidUtf8CodeUnits).size();
+      };
+      BENCHMARK("string /w reserve") {
+        StringSink sink{};
+        minjson::impl::escape(sink, string, {}, minjson::Utf8Validation::FailOnInvalidUtf8CodeUnits, {});
+        return sink.str.size();
+      };
+      BENCHMARK("dummy sink") {
+        DummySink sink;
+        minjson::impl::escape(sink, string, {}, minjson::Utf8Validation::FailOnInvalidUtf8CodeUnits, {});
+        return sink.size;
+      };
+      BENCHMARK("polymorphic dummy sink") {
+        DummySink sink;
+        minjson::impl::escape<PolymorphicSink>(sink, string, {}, minjson::Utf8Validation::FailOnInvalidUtf8CodeUnits,
+                                               {});
+        return sink.size;
+      };
+    }
 
-  SECTION("non-ASCII, validate UTF-8") {
-    BENCHMARK("string") {
-      return minjson::escape(string, minjson::Escape::NonAscii, minjson::Utf8Validation::FailOnInvalidUtf8CodeUnits)
-        .size();
-    };
-    BENCHMARK("string /w reserve") {
-      StringSink sink{};
-      minjson::impl::escape(sink, string, minjson::Escape::NonAscii,
-                            minjson::Utf8Validation::FailOnInvalidUtf8CodeUnits, {});
-      return sink.str.size();
-    };
-    BENCHMARK("dummy sink") {
-      DummySink sink;
-      minjson::impl::escape(sink, string, minjson::Escape::NonAscii,
-                            minjson::Utf8Validation::FailOnInvalidUtf8CodeUnits, {});
-      return sink.size;
-    };
-    BENCHMARK("polymorphic dummy sink") {
-      DummySink sink;
-      minjson::impl::escape<PolymorphicSink>(sink, string, minjson::Escape::NonAscii,
-                                             minjson::Utf8Validation::FailOnInvalidUtf8CodeUnits, {});
-      return sink.size;
-    };
+    SECTION("non-ASCII") {
+      BENCHMARK("string") {
+        return minjson::escape(string, minjson::Escape::NonAscii).size();
+      };
+      BENCHMARK("string /w reserve") {
+        StringSink sink{};
+        minjson::impl::escape(sink, string, minjson::Escape::NonAscii, {}, {});
+        return sink.str.size();
+      };
+      BENCHMARK("dummy sink") {
+        DummySink sink;
+        minjson::impl::escape(sink, string, minjson::Escape::NonAscii, {}, {});
+        return sink.size;
+      };
+      BENCHMARK("polymorphic dummy sink") {
+        DummySink sink;
+        minjson::impl::escape<PolymorphicSink>(sink, string, minjson::Escape::NonAscii, {}, {});
+        return sink.size;
+      };
+    }
+
+    SECTION("non-ASCII, validate UTF-8") {
+      BENCHMARK("string") {
+        return minjson::escape(string, minjson::Escape::NonAscii, minjson::Utf8Validation::FailOnInvalidUtf8CodeUnits)
+          .size();
+      };
+      BENCHMARK("string /w reserve") {
+        StringSink sink{};
+        minjson::impl::escape(sink, string, minjson::Escape::NonAscii,
+                              minjson::Utf8Validation::FailOnInvalidUtf8CodeUnits, {});
+        return sink.str.size();
+      };
+      BENCHMARK("dummy sink") {
+        DummySink sink;
+        minjson::impl::escape(sink, string, minjson::Escape::NonAscii,
+                              minjson::Utf8Validation::FailOnInvalidUtf8CodeUnits, {});
+        return sink.size;
+      };
+      BENCHMARK("polymorphic dummy sink") {
+        DummySink sink;
+        minjson::impl::escape<PolymorphicSink>(sink, string, minjson::Escape::NonAscii,
+                                               minjson::Utf8Validation::FailOnInvalidUtf8CodeUnits, {});
+        return sink.size;
+      };
+    }
   }
 }
 
@@ -255,52 +269,58 @@ TEST_CASE("serialization benchmark", "[serialization][!benchmark]") {
 
 
 TEST_CASE("unescape benchmark (valid escapes)", "[unescape][!benchmark]") {
-  const auto string =
-    R"(some ASCII character escapes: \b \f \n \r \t \" \\ )"
-    R"(some ASCII control character escapes: \u0000 \u000f )"
-    R"(utf8 2 byte code point \u00a3 3 byte code point \u20ac 4 byte code point \ud83d\ude00 characters)"sv;
+  const auto [theString, name] = GENERATE(
+    std::pair{ R"(some ASCII character escapes: \b \f \n \r \t \" \\ )"
+               R"(some ASCII control character escapes: \u0000 \u000f )"
+               R"(utf8 2 byte code point \u00a3 3 byte code point \u20ac 4 byte code point \ud83d\ude00 characters)"sv,
+               "string containing escapes" },
+    std::pair{ loremIpsum, "lorem ipsum" });
 
-  SECTION("default") {
-    BENCHMARK("string") {
-      return minjson::unescape(string).size();
-    };
-    BENCHMARK("string /w reserve") {
-      StringSink sink{};
-      minjson::impl::unescape(sink, string, {}, minjson::impl::DoNotReplaceSurrogates);
-      return sink.str.size();
-    };
-    BENCHMARK("dummy sink") {
-      DummySink sink;
-      minjson::impl::unescape(sink, string, {}, minjson::impl::DoNotReplaceSurrogates);
-      return sink.size;
-    };
-    BENCHMARK("polymorphic dummy sink") {
-      DummySink sink;
-      minjson::impl::unescape<PolymorphicSink>(sink, string, {}, minjson::impl::DoNotReplaceSurrogates);
-      return sink.size;
-    };
-  }
+  DYNAMIC_SECTION(name) {
+    const auto string = theString;  // BENCHMARK() macro does not support capturing structured bindings in C++17
 
-  SECTION("strict") {
-    BENCHMARK("string") {
-      return minjson::unescape(string, minjson::UnescapeMode::Strict).size();
-    };
-    BENCHMARK("string /w reserve") {
-      StringSink sink{};
-      minjson::impl::unescape(sink, string, minjson::UnescapeMode::Strict, minjson::impl::DoNotReplaceSurrogates);
-      return sink.str.size();
-    };
-    BENCHMARK("dummy sink") {
-      DummySink sink;
-      minjson::impl::unescape(sink, string, minjson::UnescapeMode::Strict, minjson::impl::DoNotReplaceSurrogates);
-      return sink.size;
-    };
-    BENCHMARK("polymorphic dummy sink") {
-      DummySink sink;
-      minjson::impl::unescape<PolymorphicSink>(sink, string, minjson::UnescapeMode::Strict,
-                                               minjson::impl::DoNotReplaceSurrogates);
-      return sink.size;
-    };
+    SECTION("default") {
+      BENCHMARK("string") {
+        return minjson::unescape(string).size();
+      };
+      BENCHMARK("string /w reserve") {
+        StringSink sink{};
+        minjson::impl::unescape(sink, string, {}, minjson::impl::DoNotReplaceSurrogates);
+        return sink.str.size();
+      };
+      BENCHMARK("dummy sink") {
+        DummySink sink;
+        minjson::impl::unescape(sink, string, {}, minjson::impl::DoNotReplaceSurrogates);
+        return sink.size;
+      };
+      BENCHMARK("polymorphic dummy sink") {
+        DummySink sink;
+        minjson::impl::unescape<PolymorphicSink>(sink, string, {}, minjson::impl::DoNotReplaceSurrogates);
+        return sink.size;
+      };
+    }
+
+    SECTION("strict") {
+      BENCHMARK("string") {
+        return minjson::unescape(string, minjson::UnescapeMode::Strict).size();
+      };
+      BENCHMARK("string /w reserve") {
+        StringSink sink{};
+        minjson::impl::unescape(sink, string, minjson::UnescapeMode::Strict, minjson::impl::DoNotReplaceSurrogates);
+        return sink.str.size();
+      };
+      BENCHMARK("dummy sink") {
+        DummySink sink;
+        minjson::impl::unescape(sink, string, minjson::UnescapeMode::Strict, minjson::impl::DoNotReplaceSurrogates);
+        return sink.size;
+      };
+      BENCHMARK("polymorphic dummy sink") {
+        DummySink sink;
+        minjson::impl::unescape<PolymorphicSink>(sink, string, minjson::UnescapeMode::Strict,
+                                                 minjson::impl::DoNotReplaceSurrogates);
+        return sink.size;
+      };
+    }
   }
 }
 
