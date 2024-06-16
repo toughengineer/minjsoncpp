@@ -27,7 +27,6 @@
 #pragma clang diagnostic ignored "-Wbitwise-op-parentheses"
 #pragma clang diagnostic ignored "-Wlogical-op-parentheses"
 #pragma clang diagnostic ignored "-Wmissing-field-initializers"
-#pragma clang diagnostic ignored "-Wparentheses-equality"
 #elif defined(__GNUC__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wparentheses"
@@ -383,7 +382,7 @@ namespace minjson {
               break;
             }
             if constexpr (escapeMode != Default) {
-              if ((*i & '\x80')) { // handling UTF-8 multibyte code point
+              if (*i & '\x80') { // handling UTF-8 multibyte code point
                 const size_t codePointSize = detectUtf8CodePointSize(i, end);
                 if constexpr (escapeMode & EscapeNonAscii) {
                   if (codePointSize != 0) {
@@ -1238,12 +1237,9 @@ namespace minjson {
               }
               return false;
             }
-          }
-          if constexpr (mode == IterationMode::Recursion) {
-            break;
-          }
-          else {
-            v = &a.emplace_back();
+            else {
+              v = &a.emplace_back();
+            }
           }
         }
       }
