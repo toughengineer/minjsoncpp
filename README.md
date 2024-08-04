@@ -21,7 +21,7 @@ because of that small part where you need such functionality.
 ## Supported compilers and standard libraries
 
 Compilers:
-* **gcc**: 11.1 and later\*
+* **GCC**: 11.1 and later\*
 * **Clang**: 8 (with libstdc++ 11.1..12.3) and later (with respectively supported versions of standard library)
 * **MSVC**: 19.16 (comes with Visual Studio 2017 version 15.9.11) and later
 
@@ -173,7 +173,7 @@ minjson::Value value = foo();
 visit([](auto &x) { bar(x); }, value);
 ```
 
-See [visit.cpp](examples/visit.cpp) for an example.
+See [example](examples/#visit) in [visit.cpp](examples/visit.cpp).
 
 #### Value type inspection
 
@@ -274,7 +274,7 @@ from the previous step to be an object and we are trying to get member value des
 
 This would be similar to trying to resolve JSON Pointer `/object/nested array/1`.
 
-See [resolve.cpp](examples/resolve.cpp) for more examples.
+See [more examples](examples/#resolve) in [resolve.cpp](examples/resolve.cpp).
 
 ### Sinks
 
@@ -333,7 +333,7 @@ namespace minjson {
   };
 }
 ```
-**`minjson::HexDigitsCase`** specifies hex digits case in escapes (e.g. `"\u00ae"`).
+**`minjson::HexDigitsCase`** specifies hexadecimal digits case in escapes (e.g. `"\u00ae"`).
 
 -----
 
@@ -352,7 +352,7 @@ String type must support `operator+=` with `std::string_view` operand and `reser
 When `minjson::Utf8Validation::FailOnInvalidUtf8CodeUnits` is specified, returns empty string on failure.\
 Otherwise fails only if underlying string appending fails, e.g. as a result of failed allocation.
 
-See [escape.cpp](examples/escape.cpp) for an example.
+See [example](examples/#escape) in [escape.cpp](examples/escape.cpp).
 
 -----
 
@@ -377,7 +377,7 @@ Returns
 This function does not throw exceptions on its own.\
 Exceptions thrown by the _sink_ operations are let through, i.e. are not handled.
 
-See [escape_impl.cpp](examples/escape_impl.cpp) for an example.
+See [example](examples/#escape_impl) in [escape_impl.cpp](examples/escape_impl.cpp).
 
 -----
 
@@ -595,7 +595,7 @@ namespace minjson {
 May throw `minjson::InvalidUtf8CodeUnitsError`.\
 Otherwise fails only if underlying string appending fails, e.g. as a result of failed allocation.
 
-See [serialize.cpp](examples/serialize.cpp) for an example.
+See [example](examples/#serialize) in [serialize.cpp](examples/serialize.cpp).
 
 -----
 
@@ -618,7 +618,7 @@ _Note that the root value itself is not indented._
 May throw `minjson::InvalidUtf8CodeUnitsError`.\
 Exceptions thrown by the _sink_ operations are let through, i.e. are not handled.
 
-See [serialize_impl.cpp](examples/serialize_impl.cpp) for an example.
+See [example](examples/#serialize_impl) in [serialize_impl.cpp](examples/serialize_impl.cpp).
 
 -----
 
@@ -652,7 +652,7 @@ namespace minjson {
 Fails on invalid escape sequences, and invalid JSON string characters if `minjson::UnescapeMode::Strict` is specified.\
 Otherwise fails only if underlying string appending fails, e.g. as a result of failed allocation.
 
-See [unescape.cpp](examples/unescape.cpp) for an example.
+See [example](examples/#unescape) in [unescape.cpp](examples/unescape.cpp).
 
 -----
 
@@ -702,7 +702,7 @@ If set to `minjson::impl::DoNotReplaceSurrogates` causes unmatched surrogate cod
 Fails on invalid escape sequences, and invalid JSON string characters if `minjson::UnescapeMode::Strict` is specified.\
 Exceptions thrown by the _sink_ operations are let through, i.e. are not handled.
 
-See [unescape_impl.cpp](examples/unescape_impl.cpp) for an example.
+See [example](examples/#unescape_impl) in [unescape_impl.cpp](examples/unescape_impl.cpp).
 
 -----
 
@@ -857,7 +857,7 @@ Provided `allocator` is used for all memory allocations.
 This function does not throw exceptions on its own.\
 Otherwise fails only if underlying entity operation fails, e.g. as a result of failed allocation.
 
-See [parse.cpp](examples/parse.cpp) for an example.
+See [example](examples/#parse) in [parse.cpp](examples/parse.cpp).
 
 -----
 
@@ -883,7 +883,7 @@ Provided `allocator` is used for all memory allocations.
 This function does not throw exceptions on its own.\
 Otherwise fails only if underlying entity operation fails, e.g. as a result of failed allocation.
 
-See [parse_impl.cpp](examples/parse_impl.cpp) for an example.
+See [example](examples/#parse_impl) in [parse_impl.cpp](examples/parse_impl.cpp).
 
 -----
 
