@@ -36,7 +36,8 @@
 #pragma warning(push)
 #pragma warning(disable: 4309 4459 4102) // truncation of constant value; declaration hides global declaration; unreferenced label
 #endif
-#if defined(_MSC_VER) && (defined(_MSVC_LANG) && _MSVC_LANG > __cplusplus && _MSVC_LANG == 201703L || __cplusplus == 201703L)
+#if defined(_MSC_VER) && _MSVC_STL_UPDATE < 202408L && \
+    (defined(_MSVC_LANG) && _MSVC_LANG > __cplusplus && _MSVC_LANG == 201703L || __cplusplus == 201703L)
 #define NEED_WORKAROUND_FOR_UNIMPLEMENTED_P0608
 #endif
 
