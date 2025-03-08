@@ -15,7 +15,7 @@ set(SOURCES
   "unescape.cpp"
   "parse.cpp"
   "allocator.cpp"
-  "json.org suite.cpp"
+  "json.org_suite.cpp"
   "benchmarks.cpp"
 )
 

@@ -2,15 +2,14 @@
 
 template<typename A>
 std::ostream &operator<<(std::ostream &s, const minjson::BasicValue<A> &v) {
-  static constexpr auto options = [] {
+  static constexpr auto options = std::invoke([] {
     minjson::SerializationOptions o;
     o.objectKeyValueSeparator = ": ";
     o.indent = 2;
-    // o.newline.separator = "\n";
     o.escape = minjson::Escape::NonAscii;
     o.sortObjectKeys = true;
     return o;
-  }();
+  });
   minjson::serializeToStream(s, v, options);
   return s;
 }

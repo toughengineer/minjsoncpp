@@ -195,7 +195,7 @@ TEST_CASE("escape valid UTF-8 strings", "[escape][serialize]") {
 }
 
 
-TEST_CASE("escape invalid UTF-8 strings", "[escape][invalid utf8]") {
+TEST_CASE("escape invalid UTF-8 strings", "[escape][serialize][invalid utf8]") {
   using pair = std::pair<std::string_view, std::string_view>;
 
   const auto IgnoreInvalidUtf8CodeUnits = minjson::Utf8Validation::IgnoreInvalidUtf8CodeUnits;
@@ -230,6 +230,8 @@ TEST_CASE("escape invalid UTF-8 strings", "[escape][invalid utf8]") {
       } catch (const minjson::InvalidUtf8CodeUnitsError &e) {
         CHECK(e.offset == 20);
         CHECK(NonPrintStr{ e.codeUnits } == NonPrintStr{ invalidCodeUnits });
+      } catch (...) {
+        FAIL();
       }
     }
   }
@@ -259,10 +261,11 @@ TEST_CASE("escape invalid UTF-8 strings", "[escape][invalid utf8]") {
       } catch (const minjson::InvalidUtf8CodeUnitsError &e) {
         CHECK(e.offset == 24);
         CHECK(NonPrintStr{ e.codeUnits } == NonPrintStr{ invalidCodeUnits });
+      } catch (...) {
+        FAIL();
       }
     }
   }
-
 
   SECTION("continuation bytes without starting byte") {
     const auto [string, invalidCodeUnits] =
@@ -289,6 +292,8 @@ TEST_CASE("escape invalid UTF-8 strings", "[escape][invalid utf8]") {
       } catch (const minjson::InvalidUtf8CodeUnitsError &e) {
         CHECK(e.offset == 20);
         CHECK(NonPrintStr{ e.codeUnits } == NonPrintStr{ invalidCodeUnits });
+      } catch (...) {
+        FAIL();
       }
     }
   }

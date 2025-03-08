@@ -84,7 +84,7 @@ add_subdirectory("thirdparty/minjsoncpp")
 `add_subdirectory` processes **minjsoncpp**'s CMakeLists.txt and adds `minjsoncpp` target for consumption.
 </details>
 
-### Using Cmake _FetchContent_
+### Using CMake _FetchContent_
 
 You can use [_FetchContent_](https://cmake.org/cmake/help/latest/module/FetchContent.html)
 to get the library via CMakeLists.txt:
@@ -933,16 +933,16 @@ requirements.
 
 By convention, in order not to multiply instantiations, `minjson::BasicValue` is instantiated
 with an allocator type parameterized with `char` type,
-e.g. a convenient alias for specialization with `std::allocator` is already provided in the following form:
+e.g. a convenient alias for instantiation with `std::allocator` is already provided in the following form:
 ```c++
 namespace minjson {
   using Value = BasicValue<std::allocator<char>>;
 }
 ```
 
-You can define your own specialization like this:
+You can define your own instantiation like this:
 ```c++
-using PmrValue = BasicValue<std::pmr::polymorphic_allocator<char>>;
+using PmrValue = minjson::BasicValue<std::pmr::polymorphic_allocator<char>>;
 ```
 
 ### Allocator awareness
@@ -962,4 +962,4 @@ i.e. it's ~~turtles~~ allocator propagation all the way down.
 This software is licensed under the MIT license (SPDX identifier: MIT), see [LICENSE](LICENSE) file for full text.
 
 As an exception [minjsoncpp.h](include/minjsoncpp.h) is available under
-the [MIT No Attribution license (SPDX identifier: MIT-0)](https://opensource.org/license/mit-0/).
+the [MIT No Attribution license (SPDX identifier: MIT-0)](https://opensource.org/license/mit-0).
