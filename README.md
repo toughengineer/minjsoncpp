@@ -35,7 +35,7 @@ Standard libraries:
 
 \*Since the earliest supported version of libstdc++ is 11.1 that's the corresponding earliest supported version of GCC
 because they (typically) come together.\
-\*\*libc++ does not implement `std::from_chars()` for `double`; `strtod()` is used instead when building with libc++.
+\*\*libc++ until version 20.1 does not implement `std::from_chars()` for `double`; `strtod()` is used instead when building with libc++.
 
 In general you should be able to use it with any fully C++17 conformant compiler and standard library.
 

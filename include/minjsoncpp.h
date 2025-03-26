@@ -17,7 +17,7 @@
 #include <ostream>
 #include <stdexcept>
 #include <utility>
-#if defined(_LIBCPP_VERSION)
+#if defined(_LIBCPP_VERSION) && _LIBCPP_VERSION < 200100
 #include <cstring> // for memcpy()
 #include <cstdlib> // for strtod()
 #endif
@@ -1369,7 +1369,8 @@ namespace minjson {
           }
         }
         double decimal;
-#if defined(_LIBCPP_VERSION) // libc++ does not implement std::from_chars() for double
+// libc++ version 19 and earlier does not implement std::from_chars() for double
+#if defined(_LIBCPP_VERSION) && _LIBCPP_VERSION < 200100
         char buf[1024];
         if (static_cast<size_t>(i - begin) > sizeof(buf) - 1) {
           addIssue(begin, "parsed number value is out of range"sv, ParsingIssue::Code::ParsedNumberOutOfRange);
