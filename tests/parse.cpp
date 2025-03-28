@@ -509,8 +509,8 @@ TEST_CASE("parse syntactically invalid JSON", "[parse][invalid json]") {
 
   SECTION("invalid objects") {
     SECTION("incomplete") {
-      const auto string = GENERATE(R"({"no closing brace":null)"sv, R"({"no closing bracket after comma":null,)"sv,
-                                   R"({"no value after colon":)"sv, R"({"no value after key")"sv);
+      const auto string = GENERATE(R"({"no colon after key")"sv, R"({"no value after colon":)"sv,
+                                   R"({"no closing brace":null)"sv, R"({"no member after comma":null,)"sv);
       CAPTURE(string);
 
       const auto [value, status, parsedSize, issues] = minjson::parse(string);

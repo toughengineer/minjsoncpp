@@ -489,7 +489,7 @@ TEST_CASE("unescape/parse string with invalid escapes", "[unescape][parse][inval
     const auto string = std::string{ "invalid escape \\" } + c + std::string{ " spec character" };
     CAPTURE(string);
 
-    SECTION("escape") {
+    SECTION("unescape") {
       CHECK(minjson::impl::unescape(dummy, string, {}, DoNotReplaceSurrogates) == 16);
     }
 
@@ -587,7 +587,7 @@ TEST_CASE("unescape/parse string with invalid escapes", "[unescape][parse][inval
     }
 
     SECTION("incomplete escape") {
-      SECTION("escape") {
+      SECTION("unescape") {
         // cutting 5 characters makes an invalid JSON string like this: "...\"
         // so we only test unescape()
         const auto string = validString.substr(0, validString.size() - 5);
@@ -599,7 +599,7 @@ TEST_CASE("unescape/parse string with invalid escapes", "[unescape][parse][inval
       const size_t cut = GENERATE(1, 2, 3, 4);
       const auto string = validString.substr(0, validString.size() - cut);
 
-      SECTION("escape") {
+      SECTION("unescape") {
         CAPTURE(string);
         CHECK(minjson::unescape(string).empty());
         CHECK(minjson::impl::unescape(dummy, string, {}, DoNotReplaceSurrogates) == minjson::impl::NPos);
