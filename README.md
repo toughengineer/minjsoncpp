@@ -644,7 +644,7 @@ In both modes `\`&nbsp;(`\x5C`) must introduce a valid escape sequence, e.g.: `"
 namespace minjson {
   template<typename String_t = String>
   [[nodiscard]] String_t unescape(std::string_view input,
-                                  UnescapeMode unescapeMode = {});
+                                  UnescapeMode unescapeMode = UnescapeMode::Strict);
 }
 ```
 **`minjson::unescape()`** returns string containing unescaped _input_, or empty string on failure.

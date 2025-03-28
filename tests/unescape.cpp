@@ -56,7 +56,6 @@ TEST_CASE("unescape/parse string without escapes", "[unescape][parse]") {
 
     SECTION("unchanged in relaxed mode") {
       CAPTURE(asciiControlsString);
-      CHECK(minjson::unescape(asciiControlsString) == asciiControlsString);
       CHECK(minjson::unescape(asciiControlsString, minjson::UnescapeMode::Relaxed) == asciiControlsString);
     }
 
@@ -64,7 +63,8 @@ TEST_CASE("unescape/parse string without escapes", "[unescape][parse]") {
     SECTION("error in strict mode and during parsing") {
       SECTION("unescape") {
         CAPTURE(asciiControlsString);
-        REQUIRE(minjson::unescape(asciiControlsString, minjson::UnescapeMode::Strict).empty());
+        CHECK(minjson::unescape(asciiControlsString).empty());
+        CHECK(minjson::unescape(asciiControlsString, minjson::UnescapeMode::Strict).empty());
       }
 
       SECTION("parse") {

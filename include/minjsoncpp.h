@@ -945,7 +945,7 @@ namespace minjson {
   }
 
   template<typename String_t = String>
-  [[nodiscard]] String_t unescape(std::string_view input, UnescapeMode unescapeMode = {}) {
+  [[nodiscard]] String_t unescape(std::string_view input, UnescapeMode unescapeMode = UnescapeMode::Strict) {
     String_t s;
     if (impl::unescape(detail::StringSink<String_t>{ s }, input, unescapeMode) == input.size())
       return s;
