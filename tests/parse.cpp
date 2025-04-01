@@ -492,9 +492,11 @@ TEST_CASE("parse syntactically invalid JSON", "[parse][invalid json]") {
       CHECK(issues[0].offset == string.size());
     }
 
-    SECTION("invalid separator") {
+    SECTION("invalid separator, missing member/extra comma") {
       const auto string =
-        GENERATE(R"(["no comma"       "between members"])"sv, R"(["wrong separator"; "between members"])"sv);
+        GENERATE(R"(["no comma"       "between members"])"sv, R"(["wrong separator"; "between members"])"sv,
+                 R"(["missing value", ])"sv, R"(["missing value", , "or extra comma"])"sv,
+                 R"([1, 2, 3, 4, 5, 6,, 7])"sv, R"([1, 2, 3, 4, 5, 6,])"sv);
       CAPTURE(string);
 
       const auto [value, status, parsedSize, issues] = minjson::parse(string);
@@ -536,12 +538,16 @@ TEST_CASE("parse syntactically invalid JSON", "[parse][invalid json]") {
       CHECK(issues[0].offset == 1);
     }
 
-    SECTION("invalid separators") {
+    SECTION("invalid separators, missing member/extra comma") {
       // clang-format off
       const auto string =
         GENERATE(R"({"no comma":null       "between members":null})"sv,
                  R"({"wrong separator":null; "between members"})"sv,
-                 R"({"wrong key separator" = null})"sv);
+                 R"({"wrong key separator" = null})"sv,
+                 R"({"missing member":null,, "or extra comma":null})"sv,
+                 R"({"a":1, "b":2, "c":3,  , "d":4})"sv,
+                 R"({"a":1, "b":2, "c":3,  })"sv
+                 );
       // clang-format on
       CAPTURE(string);
 
