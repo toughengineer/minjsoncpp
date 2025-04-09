@@ -27,13 +27,13 @@ TEST_CASE("escape valid UTF-8 strings", "[escape][serialize]") {
   SECTION("control and common escape characters") {
     // clang-format off
     const auto [string, escapedString] = GENERATE(
-      pair{ "null \0 character"sv, "null \\u0000 character"sv },
-      pair{ "tab \t character"sv, "tab \\t character"sv },
-      pair{ "carriage return \r character"sv, "carriage return \\r character"sv },
-      pair{ "line feed \n character"sv, "line feed \\n character"sv },
-      pair{ "whatever this \xf character is"sv, "whatever this \\u000f character is"sv },
-      pair{ "quotation mark \" character"sv, "quotation mark \\\" character"sv },
-      pair{ "reverse solidus \\ character"sv, "reverse solidus \\\\ character"sv });
+      pair{ "null \0 character"sv, R"(null \u0000 character)"sv },
+      pair{ "tab \t character"sv, R"(tab \t character)"sv },
+      pair{ "carriage return \r character"sv, R"(carriage return \r character)"sv },
+      pair{ "line feed \n character"sv, R"(line feed \n character)"sv },
+      pair{ "whatever this \xf character is"sv, R"(whatever this \u000f character is)"sv },
+      pair{ R"(quotation mark " character)"sv, R"(quotation mark \" character)"sv },
+      pair{ R"(reverse solidus \ character)"sv, R"(reverse solidus \\ character)"sv });
     // clang-format on
     CAPTURE(string, escapedString);
 
@@ -49,25 +49,25 @@ TEST_CASE("escape valid UTF-8 strings", "[escape][serialize]") {
   SECTION("control and common escape characters at different ends of a string") {
     // clang-format off
     const auto [string, escapedString] = GENERATE(
-      pair{ "null \0"sv, "null \\u0000"sv },
-      pair{ "\0 character"sv, "\\u0000 character"sv },
-      pair{ "\0"sv, "\\u0000"sv },
+      pair{ "null \0"sv, R"(null \u0000)"sv },
+      pair{ "\0 character"sv, R"(\u0000 character)"sv },
+      pair{ "\0"sv, R"(\u0000)"sv },
 
-      pair{ "tab \t"sv, "tab \\t"sv },
-      pair{ "\t character"sv, "\\t character"sv },
-      pair{ "\t"sv, "\\t"sv },
+      pair{ "tab \t"sv, R"(tab \t)"sv },
+      pair{ "\t character"sv, R"(\t character)"sv },
+      pair{ "\t"sv, R"(\t)"sv },
 
-      pair{ "line feed \n"sv, "line feed \\n"sv },
-      pair{ "\n character"sv, "\\n character"sv },
-      pair{ "\n"sv, "\\n"sv },
+      pair{ "line feed \n"sv, R"(line feed \n)"sv },
+      pair{ "\n character"sv, R"(\n character)"sv },
+      pair{ "\n"sv, R"(\n)"sv },
 
-      pair{ "quotation mark \""sv, "quotation mark \\\""sv },
-      pair{ "\" character"sv, "\\\" character"sv },
-      pair{ "\""sv, "\\\""sv },
+      pair{ R"(quotation mark ")"sv, R"(quotation mark \")"sv },
+      pair{ R"(" character)"sv, R"(\" character)"sv },
+      pair{ R"(")"sv, R"(\")"sv },
 
-      pair{ "reverse solidus \\"sv, "reverse solidus \\\\"sv },
-      pair{ "\\ character is"sv, "\\\\ character is"sv },
-      pair{ "\\"sv, "\\\\"sv });
+      pair{ R"(reverse solidus \)"sv, R"(reverse solidus \\)"sv },
+      pair{ R"(\ character)"sv, R"(\\ character)"sv },
+      pair{ R"(\)"sv, R"(\\)"sv });
     // clang-format on
     CAPTURE(string, escapedString);
 
@@ -113,12 +113,12 @@ TEST_CASE("escape valid UTF-8 strings", "[escape][serialize]") {
   SECTION("escape non-ASCII characters") {
     const auto [string, escapedString] = GENERATE(
       // "pound sign £ character"
-      pair{ "pound sign \xC2\xA3 character"sv, "pound sign \\u00a3 character"sv },
+      pair{ "pound sign \xC2\xA3 character"sv, R"(pound sign \u00a3 character)"sv },
       // "euro sign € character"
-      pair{ "euro sign \xE2\x82\xAC character"sv, "euro sign \\u20ac character"sv },
+      pair{ "euro sign \xE2\x82\xAC character"sv, R"(euro sign \u20ac character)"sv },
       // "whatever this emoji 😀 character is"
       pair{ "whatever this emoji \xF0\x9F\x98\x80 character is"sv,
-            "whatever this emoji \\ud83d\\ude00 character is"sv });
+            R"(whatever this emoji \ud83d\ude00 character is)"sv });
     CAPTURE(string, escapedString);
 
     SECTION("escape") {
@@ -140,7 +140,7 @@ TEST_CASE("escape valid UTF-8 strings", "[escape][serialize]") {
 
     SECTION("default") {
       const auto string = "whatever this \xf character is"sv;
-      const auto escapedString = "whatever this \\u000F character is"sv;
+      const auto escapedString = R"(whatever this \u000F character is)"sv;
       CAPTURE(string, escapedString);
 
       SECTION("escape") {
@@ -155,12 +155,12 @@ TEST_CASE("escape valid UTF-8 strings", "[escape][serialize]") {
     SECTION("escape non-ASCII") {
       const auto [string, escapedString] = GENERATE(
         // "pound sign £ character"
-        pair{ "pound sign \xC2\xA3 character"sv, "pound sign \\u00A3 character"sv },
+        pair{ "pound sign \xC2\xA3 character"sv, R"(pound sign \u00A3 character)"sv },
         // "euro sign € character"
-        pair{ "euro sign \xE2\x82\xAC character"sv, "euro sign \\u20AC character"sv },
+        pair{ "euro sign \xE2\x82\xAC character"sv, R"(euro sign \u20AC character)"sv },
         // "whatever this emoji 😀 character is"
         pair{ "whatever this emoji \xF0\x9F\x98\x80 character is"sv,
-              "whatever this emoji \\uD83D\\uDE00 character is"sv });
+              R"(whatever this emoji \uD83D\uDE00 character is)"sv });
       CAPTURE(string, escapedString);
 
       SECTION("escape") {

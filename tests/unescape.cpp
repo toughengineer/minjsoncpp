@@ -84,7 +84,7 @@ TEST_CASE("unescape/parse string without escapes", "[unescape][parse]") {
         constexpr auto DoNotReplaceSurrogates = minjson::impl::DoNotReplaceSurrogates;
 
         SECTION("unescape string containing \"") {
-          CHECK(minjson::impl::unescape(dummy, "invalid \" quotation mark character"sv, minjson::UnescapeMode::Strict,
+          CHECK(minjson::impl::unescape(dummy, R"(invalid " quotation mark character)"sv, minjson::UnescapeMode::Strict,
                                         DoNotReplaceSurrogates) == 8);
         }
 
@@ -119,16 +119,16 @@ TEST_CASE("unescape/parse string with valid escapes", "[unescape][parse]") {
   using pair = std::pair<std::string_view, std::string_view>;
   SECTION("common escapes") {
     const auto [string, unescapedString] =
-      GENERATE(pair{ "null \\u0000 character"sv, "null \0 character"sv },
-               pair{ "backspace \\b character"sv, "backspace \b character"sv },
-               pair{ "form feed \\f character"sv, "form feed \f character"sv },
-               pair{ "line feed \\n character"sv, "line feed \n character"sv },
-               pair{ "carriage return \\r character"sv, "carriage return \r character"sv },
-               pair{ "tab \\t character"sv, "tab \t character"sv },
-               pair{ "whatever this \\u000f character is"sv, "whatever this \xf character is"sv },
-               pair{ "quotation mark \\\" character"sv, "quotation mark \" character"sv },
-               pair{ "solidus \\/ character"sv, "solidus / character"sv },
-               pair{ "reverse solidus \\\\ character"sv, "reverse solidus \\ character"sv });
+      GENERATE(pair{ R"(null \u0000 character)"sv, "null \0 character"sv },
+               pair{ R"(backspace \b character)"sv, "backspace \b character"sv },
+               pair{ R"(form feed \f character)"sv, "form feed \f character"sv },
+               pair{ R"(line feed \n character)"sv, "line feed \n character"sv },
+               pair{ R"(carriage return \r character)"sv, "carriage return \r character"sv },
+               pair{ R"(tab \t character)"sv, "tab \t character"sv },
+               pair{ R"(whatever this \u000f character is)"sv, "whatever this \xf character is"sv },
+               pair{ R"(quotation mark \" character)"sv, R"(quotation mark " character)"sv },
+               pair{ R"(solidus \/ character)"sv, "solidus / character"sv },
+               pair{ R"(reverse solidus \\ character)"sv, R"(reverse solidus \ character)"sv });
 
     SECTION("unescape") {
       CAPTURE(string);
@@ -150,10 +150,10 @@ TEST_CASE("unescape/parse string with valid escapes", "[unescape][parse]") {
 
   SECTION("unicode escapes") {
     const auto [string, unescapedString] =
-      GENERATE(pair{ "pound sign \\u00a3 character"sv, "pound sign \xC2\xA3 character"sv },
-               pair{ "pound sign \\u00A3 character"sv, "pound sign \xC2\xA3 character"sv },
-               pair{ "euro sign \\u20ac character"sv, "euro sign \xE2\x82\xAC character"sv },
-               pair{ "euro sign \\u20AC character"sv, "euro sign \xE2\x82\xAC character"sv });
+      GENERATE(pair{ R"(pound sign \u00a3 character)"sv, "pound sign \xC2\xA3 character"sv },
+               pair{ R"(pound sign \u00A3 character)"sv, "pound sign \xC2\xA3 character"sv },
+               pair{ R"(euro sign \u20ac character)"sv, "euro sign \xE2\x82\xAC character"sv },
+               pair{ R"(euro sign \u20AC character)"sv, "euro sign \xE2\x82\xAC character"sv });
 
     SECTION("unescape") {
       CAPTURE(string);
@@ -174,8 +174,8 @@ TEST_CASE("unescape/parse string with valid escapes", "[unescape][parse]") {
   }
 
   SECTION("utf16 surrogates escapes") {
-    const auto string = GENERATE("whatever this emoji \\ud83d\\ude00 character is"sv,
-                                 "whatever this emoji \\ud83D\\uDe00 character is"sv);
+    const auto string = GENERATE(R"(whatever this emoji \ud83d\ude00 character is)"sv,
+                                 R"(whatever this emoji \ud83D\uDe00 character is)"sv);
     const auto unescapedString = "whatever this emoji \xF0\x9F\x98\x80 character is"sv;
 
     SECTION("unescape") {
@@ -200,7 +200,7 @@ TEST_CASE("unescape/parse string with valid escapes", "[unescape][parse]") {
 
 TEST_CASE("unescape/parse string with unpaired utf16 surrogates", "[unescape][parse][meh]") {
   SECTION("non-consecutive high and low surrogates") {
-    const auto string = "unpaired surrogates \\ud83d \\ude00 characters"sv;
+    const auto string = R"(unpaired surrogates \ud83d \ude00 characters)"sv;
     const auto unescapedString = "unpaired surrogates \xED\xA0\xBD \xED\xB8\x80 characters"sv;
     // replacing with replacement character �
     const auto unescapedStringWithReplacedSurrogates = "unpaired surrogates \xEF\xBF\xBD \xEF\xBF\xBD characters"sv;
@@ -273,15 +273,15 @@ TEST_CASE("unescape/parse string with unpaired utf16 surrogates", "[unescape][pa
   SECTION("unpaired surrogates") {
     using tuple = std::tuple<std::string_view, std::string_view, std::string_view, minjson::ParsingIssue::Code>;
     const auto [string, unescapedString, unescapedStringWithReplacedSurrogates, parsingIssueCode] =
-      GENERATE(tuple{ "unpaired surrogate \\ud83d"sv,  // at the end of the string
+      GENERATE(tuple{ R"(unpaired surrogate \ud83d)"sv,  // at the end of the string
                       "unpaired surrogate \xED\xA0\xBD"sv,
                       "unpaired surrogate \xEF\xBF\xBD"sv,  // replacing with replacement character �
                       minjson::ParsingIssue::Code::StringContainsUnpairedUtf16HighSurrogate },
-               tuple{ "unpaired surrogate \\ude00"sv,  // at the end of the string
+               tuple{ R"(unpaired surrogate \ude00)"sv,  // at the end of the string
                       "unpaired surrogate \xED\xB8\x80"sv,
                       "unpaired surrogate \xEF\xBF\xBD"sv,  // replacing with replacement character �
                       minjson::ParsingIssue::Code::StringContainsUnpairedUtf16LowSurrogate },
-               tuple{ "unpaired surrogate \\ud83d\\u20ac followed by euro sign"sv,
+               tuple{ R"(unpaired surrogate \ud83d\u20ac followed by euro sign)"sv,
                       "unpaired surrogate \xED\xA0\xBD\xE2\x82\xAC followed by euro sign"sv,
                       // replacing with replacement character �
                       "unpaired surrogate \xEF\xBF\xBD\xE2\x82\xAC followed by euro sign"sv,
@@ -337,7 +337,7 @@ TEST_CASE("unescape/parse string with unpaired utf16 surrogates", "[unescape][pa
   }
 
   SECTION("consecutive unpaired high surrogates") {
-    const auto string = "unpaired surrogate \\ud83d\\ud83d followed by an unpaired surrogate"sv;
+    const auto string = R"(unpaired surrogate \ud83d\ud83d followed by an unpaired surrogate)"sv;
     const auto unescapedString = "unpaired surrogate \xED\xA0\xBD\xED\xA0\xBD followed by an unpaired surrogate"sv;
     // replacing with replacement character �
     const auto unescapedStringWithReplacedSurrogates =
@@ -443,7 +443,7 @@ TEST_CASE("unescape/parse string with unpaired utf16 surrogates", "[unescape][pa
 TEST_CASE("unescape/parse string with invalid escapes", "[unescape][parse][invalid escapes]") {
   SECTION("invalid escapes") {
 
-    const auto string = "invalid escapes: \\a \\b \\0 \\1 \\. \\, \\: \\ (space)"sv;
+    const auto string = R"(invalid escapes: \a \b \0 \1 \. \, \: \ (space))"sv;
     CAPTURE(string);
 
     SECTION("unescape") {
@@ -479,14 +479,14 @@ TEST_CASE("unescape/parse string with invalid escapes", "[unescape][parse][inval
       '[', ']', '^', '_', // \x5B..\x5F
       '`', // \x60
       // chars 'a'..'z' except bfnrtu
-      'a', 'c', 'd', 'e', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'o', 'p', 'q', 's', 'v', 'w', 'x', 'y', 'z', // \x61..\\x7A
+      'a', 'c', 'd', 'e', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'o', 'p', 'q', 's', 'v', 'w', 'x', 'y', 'z', // \x61..\x7A
       '{', '|', '}', '~', '\x7f', // \x7B..\x7F
       range('\x80', '\xFF'), '\xFF' // \x80..\xFF
       );
     // clang-format on
 
-    INFO(PrintCharHex{ c } << " after \\");
-    const auto string = std::string{ "invalid escape \\" } + c + std::string{ " spec character" };
+    INFO(PrintCharHex{ c } << R"( after \)");
+    const auto string = std::string{ R"(invalid escape \)" } + c + std::string{ " spec character" };
     CAPTURE(string);
 
     SECTION("unescape") {
@@ -516,14 +516,14 @@ TEST_CASE("unescape/parse string with invalid escapes", "[unescape][parse][inval
         '[', ']', '^', '_', // \x5B..\x5F
         '`', // \x60
         // chars 'a'..'z' except bfnrtu
-        range('g', static_cast<char>('z' + 1)), // \x67..\\x7A
+        range('g', static_cast<char>('z' + 1)), // \x67..\x7A
         '{', '|', '}', '~', '\x7f', // \x7B..\x7F
         range('\x80', '\xFF'), '\xFF' // \x80..\xFF
       );
     // clang-format on
 
-    INFO(PrintCharHex{ c } << " after \\u");
-    const auto string = std::string{ "invalid escape \\u" } + c + std::string{ "0000 spec" };
+    INFO(PrintCharHex{ c } << R"( after \u)");
+    const auto string = std::string{ R"(invalid escape \u)" } + c + std::string{ "0000 spec" };
     CAPTURE(string);
 
     SECTION("unescape") {
@@ -542,7 +542,8 @@ TEST_CASE("unescape/parse string with invalid escapes", "[unescape][parse][inval
   }
 
   SECTION("invalid unicode escape number spec") {
-    const auto string = GENERATE("invalid escape   \\uaG00"sv, "invalid escape  \\u1aG0"sv, "invalid escape \\u01aG"sv);
+    const auto string =
+      GENERATE(R"(invalid escape   \uaG00)"sv, R"(invalid escape  \u1aG0)"sv, R"(invalid escape \u01aG)"sv);
     CAPTURE(string);
 
     SECTION("unescape") {
@@ -563,7 +564,7 @@ TEST_CASE("unescape/parse string with invalid escapes", "[unescape][parse][inval
 
 
   SECTION("incomplete escape at the end of the string") {
-    const auto validString = "escape at the end of the string \\u0000"sv;
+    const auto validString = R"(escape at the end of the string \u0000)"sv;
 
     SECTION("sanity check") {
       const auto escapedString = "escape at the end of the string \0"sv;

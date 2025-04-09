@@ -47,7 +47,7 @@ inline bool isPrintableAsciiChar(char c) {
 }
 inline void writeCharHex(std::ostream &s, char c) {
   constexpr char hexDigits[] = "0123456789ABCDEF";
-  s << "\\x" << hexDigits[static_cast<uint8_t>(c) >> 4] << hexDigits[c & 0xf];
+  s << R"(\x)" << hexDigits[static_cast<uint8_t>(c) >> 4] << hexDigits[c & 0xf];
 }
 
 struct PrintCharHex {
