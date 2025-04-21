@@ -351,7 +351,7 @@ TEST_CASE("parsing benchmark", "[parse][!benchmark]") {
 
 
     BENCHMARK("default") {
-      return std::move(minjson::parse(string).parsedSize);
+      return minjson::parse(string).parsedSize;
     };
 
 #if defined(POLYMORPHIC_ALLOCATOR_IS_SUPPORTED)
