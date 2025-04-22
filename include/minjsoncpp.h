@@ -1072,8 +1072,7 @@ namespace minjson {
       }
 
       bool match(std::string_view pattern) {
-        // first char should already be matched
-        ++i;
+        ++i; // first char should already be matched
         auto p = pattern.begin() + 1;
         for (;;) {
           if (detectEndOfInput())
@@ -1296,7 +1295,7 @@ namespace minjson {
       }
 
       bool detectDigits() {
-        if (!isDecimalDigit(*i)) { // should be at least one digit after decimal point
+        if (!isDecimalDigit(*i)) {
           addInvalidCharacterIssue("invalid character, decimal digit expected");
           return false;
         }
@@ -1336,7 +1335,7 @@ namespace minjson {
         bool isDecimal = false;
         // detecting fraction part
         if (!isEmpty() && *i == '.') {
-          if (advanceAndDetectEndOfInput() || !detectDigits())
+          if (advanceAndDetectEndOfInput() || !detectDigits()) // should be at least one digit after decimal point
             return false;
           isDecimal = true;
         }
