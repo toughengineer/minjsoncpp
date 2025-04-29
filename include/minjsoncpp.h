@@ -27,6 +27,7 @@
 #pragma clang diagnostic ignored "-Wbitwise-op-parentheses"
 #pragma clang diagnostic ignored "-Wlogical-op-parentheses"
 #pragma clang diagnostic ignored "-Wmissing-field-initializers"
+#pragma clang diagnostic ignored "-Wparentheses-equality"
 #elif defined(__GNUC__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wparentheses"
@@ -1186,6 +1187,19 @@ namespace minjson {
       bool parseString(Variant &v) {
         return parseString(v.template emplace<String>(allocator));
       }
+      struct InPlaceVector {
+        static constexpr size_t Capacity = 42;
+        union {
+          Value b[Capacity];
+        };
+        size_t size = 0;
+        InPlaceVector() {}
+        ~InPlaceVector() { std::destroy_n(b, size); }
+        auto &emplace_back() {
+          ::new(b + size) Value;
+          return b[size++];
+        }
+      };
       bool parseArray(Variant &v) {
         ++i; // opening '[' is already matched
         if (detectEndOfInputAfterSkippingWhitespaces())
@@ -1195,18 +1209,19 @@ namespace minjson {
           ++i;
           return true;
         }
-        Value u;
-        if (parseArrayMembers<IterationMode::Recursion>(a, &u, size_t{ 1 })) {
-          a[0] = std::move(u);
-          return true;
-        }
-        return false;
+        return parseArrayMembers(a, InPlaceVector{});
       }
-      enum class IterationMode { Recursion, Loop };
-      template<IterationMode mode, typename... Size>
-      bool parseArrayMembers(typename Value::Array &a, Value *v, Size... size_) {
-        static_assert(sizeof...(size_) == (mode == IterationMode::Recursion ? 1 : 0));
+      template<typename... T>
+      bool parseArrayMembers(typename Value::Array &a, T... b) {
+        static_assert(sizeof...(b) <= 1);
         for (;;) {
+          Value *v;
+          if constexpr (sizeof...(b)) {
+            v = (&b.emplace_back(), ...);
+          }
+          else {
+            v = &a.emplace_back();
+          }
           if (!parseImpl(v->variant()) || detectEndOfInputAfterSkippingWhitespaces())
             return false;
           switch (*i) {
@@ -1216,29 +1231,23 @@ namespace minjson {
 
           case ']':
             ++i;
-            if constexpr (mode == IterationMode::Recursion)
-              a.resize((size_ + ... + 0));
+            if constexpr (sizeof...(b))
+              (a.assign(std::make_move_iterator(b.b), std::make_move_iterator(b.b + b.size)), ...);
             return true;
 
           case ',':
             ++i;
             if (detectEndOfInputAfterSkippingWhitespaces())
               return false;
-            if constexpr (mode == IterationMode::Recursion) {
-              const size_t size = (size_ + ... + 0);
-              if (size > 42) { // too deep recursion, parsing the rest iteratively
-                a.resize(size + 1);
-                return parseArrayMembers<IterationMode::Loop>(a, &a.back());
-              }
-              Value u;
-              if (parseArrayMembers<IterationMode::Recursion>(a, &u, size + 1)) {
-                a[size] = std::move(u);
+            if constexpr (sizeof...(b)) {
+              if (((b.size == b.Capacity), ...)) {
+                (a.reserve(b.size + 1), ...);
+                (a.resize(b.size), ...);
+                if (!parseArrayMembers(a))
+                  return false;
+                (std::copy_n(std::make_move_iterator(b.b), b.size, a.begin()), ...);
                 return true;
               }
-              return false;
-            }
-            else {
-              v = &a.emplace_back();
             }
           }
         }
