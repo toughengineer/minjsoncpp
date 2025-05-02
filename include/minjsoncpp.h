@@ -724,7 +724,7 @@ namespace minjson {
       std::string_view encodeSurrogateCodeUnitAsCodePoint(uint32_t codeUnit, char32_t surrogateReplacement) {
         if (surrogateReplacement == ~char32_t{ 0 })
           return encode123(codeUnit);
-        return surrogateReplacement >= U'\x10000' ? encode4(surrogateReplacement) : encode123(surrogateReplacement);
+        return surrogateReplacement < U'\x10000' ? encode123(surrogateReplacement) : encode4(surrogateReplacement);
       }
 
     private:
@@ -1043,9 +1043,9 @@ namespace minjson {
     private:
       bool parseImpl(Variant &v) {
         switch (*i) {
-        case 'n': return parseLiteral<Null>(v, NullLiteral);
-        case 'f': return parseLiteral<bool, false>(v, FalseLiteral);
-        case 't': return parseLiteral<bool, true>(v, TrueLiteral);
+        case NullLiteral[0]: return parseLiteral<Null>(v, NullLiteral);
+        case FalseLiteral[0]: return parseLiteral<bool, false>(v, FalseLiteral);
+        case TrueLiteral[0]: return parseLiteral<bool, true>(v, TrueLiteral);
         case '\"': return parseString(v);
         case '[': return parseArray(v);
         case '{': return parseObject(v);
@@ -1072,16 +1072,19 @@ namespace minjson {
         return detectEndOfInput();
       }
 
+      static constexpr std::string_view InvalidCharacterMessage = "invalid character";
+      bool matchCharacter(char c, std::string_view msg = InvalidCharacterMessage) {
+        if (*i == c)
+          return true;
+        addInvalidCharacterIssue(msg);
+        return false;
+      }
       bool match(std::string_view pattern) {
         ++i; // first char should already be matched
         auto p = pattern.begin() + 1;
         for (;;) {
-          if (detectEndOfInput())
+          if (detectEndOfInput() || !matchCharacter(*p))
             return false;
-          if (*i != *p) {
-            addInvalidCharacterIssue();
-            return false;
-          }
           ++i;
           if (++p == pattern.end())
             return true;
@@ -1262,18 +1265,13 @@ namespace minjson {
           return true;
         }
         for (;;) {
-          if (*i != '\"') {
-            addInvalidCharacterIssue("invalid character, JSON string expected");
+          if (!matchCharacter('\"', "invalid character, JSON string expected"))
             return false;
-          }
           const char *keyBegin = i;
           String key{ allocator };
-          if (!parseString(key) || detectEndOfInputAfterSkippingWhitespaces())
+          if (!parseString(key) || detectEndOfInputAfterSkippingWhitespaces() ||
+              !matchCharacter(':', "invalid character, ':' expected"))
             return false;
-          if (*i != ':') {
-            addInvalidCharacterIssue("invalid character, ':' expected");
-            return false;
-          }
           ++i;
           if (detectEndOfInputAfterSkippingWhitespaces())
             return false;
@@ -1296,10 +1294,9 @@ namespace minjson {
 
           case ',':
             ++i;
-            break;
+            if (detectEndOfInputAfterSkippingWhitespaces())
+              return false;
           }
-          if (detectEndOfInputAfterSkippingWhitespaces())
-            return false;
         }
       }
 
@@ -1350,15 +1347,9 @@ namespace minjson {
         }
         // detecting exponent part
         if (!isEmpty() && (*i | '\x20') == 'e') {
-          if (advanceAndDetectEndOfInput())
-            return false;
-          switch (*i) {
-          case '+':
-          case '-':
-            if (advanceAndDetectEndOfInput())
-              return false;
-          }
-          if (!detectDigits())
+          if (advanceAndDetectEndOfInput() ||
+              (*i == '+' || *i == '-') && advanceAndDetectEndOfInput() ||
+              !detectDigits())
             return false;
           isDecimal = true;
         }
@@ -1417,11 +1408,8 @@ namespace minjson {
       void addIssue(const char *p, std::string_view description, ParsingIssue::Code code) {
         issues.push_back({ static_cast<size_t>(p - input.data()), description, code });
       }
-      void addIssue(std::string_view description, ParsingIssue::Code code) {
-        addIssue(i, description, code);
-      }
-      void addInvalidCharacterIssue(std::string_view msg = "invalid character") {
-        addIssue(msg, ParsingIssue::Code::InvalidCharacter);
+      void addInvalidCharacterIssue(std::string_view msg = InvalidCharacterMessage) {
+        addIssue(i, msg, ParsingIssue::Code::InvalidCharacter);
       }
       bool checkInvalidUtf16SurrogateOptionAndEncode(String &s, uint32_t surrogate,
                                                      const char *p,
