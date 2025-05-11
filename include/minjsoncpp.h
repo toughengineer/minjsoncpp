@@ -1,4 +1,4 @@
-﻿// Minimalistic JSON C++ library by Pavel Novikov (2024)
+﻿// Minimalistic JSON C++ library by Pavel Novikov (2024, 2025)
 // for details see https://github.com/toughengineer/minjsoncpp
 #pragma once
 
