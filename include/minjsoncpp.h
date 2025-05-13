@@ -320,15 +320,25 @@ namespace minjson {
         write(buf, '0', '0', hexDigits[c >> 4], hexDigits[c & 0xfu]);
         return { buf, 6 };
       }
-      std::string_view get(uint16_t c) {
-        write(buf, c);
-        return { buf, 6 };
-      }
-      std::string_view getSurrogates(uint32_t c) {
-        const uint32_t surrogatePair = c - 0x10000u;
-        write(buf, static_cast<uint16_t>((surrogatePair >> 10) | 0xd800u));
-        write(buf + 6, static_cast<uint16_t>(surrogatePair & LowerBitsMask<10> | 0xdc00u));
-        return { buf, 12 };
+      std::string_view getForMultiByteUtf8(const char *s, size_t codePointSize) {
+        switch (codePointSize) {
+        default: // avoids error : not all control paths return a value
+        case 2:
+          write(buf, gatherBits<uint16_t, 5, 6>(s[0], s[1]));
+          return { buf, 6 };
+
+        case 3:
+          write(buf, gatherBits<uint16_t, 4, 6, 6>(s[0], s[1], s[2]));
+          return { buf, 6 };
+
+        case 4:
+        {
+          const uint32_t surrogatePair = gatherBits<uint32_t, 3, 6, 6, 6>(s[0], s[1], s[2], s[3]) - 0x10000u;
+          write(buf, static_cast<uint16_t>((surrogatePair >> 10) | 0xd800u));
+          write(buf + 6, static_cast<uint16_t>(surrogatePair & LowerBitsMask<10> | 0xdc00u));
+          return { buf, 12 };
+        }
+        }
       }
     private:
       static void write(char *p, char c1, char c2, char c3, char c4) {
@@ -376,11 +386,11 @@ namespace minjson {
           const char *i = pendingBegin;
           for (;;) {
             if (const char esc = matchCommonCharacterToEscape(*i)) {
-              writeAndAdvance(i, escaped.decorate(esc), 1);
+              writeAndAdvance(i, 1, escaped.decorate(esc));
               break;
             }
             if (isControlCharacter(*i)) { // characters 0x0..0x1f must be escaped
-              writeAndAdvance(i, escaped.get(*i), 1);
+              writeAndAdvance(i, 1, escaped.get(*i));
               break;
             }
             if constexpr (escapeMode != Default) {
@@ -388,15 +398,7 @@ namespace minjson {
                 const size_t codePointSize = detectUtf8CodePointSize(i, end);
                 if constexpr (escapeMode & EscapeNonAscii) {
                   if (codePointSize != 0) {
-                    const auto escapeSequence = std::invoke([this, codePointSize, i] {
-                      switch (codePointSize) {
-                      default: // avoids error : non-void lambda does not return a value in all control paths
-                      case 2: return escaped.get(gatherBits<uint16_t, 5, 6>(i[0], i[1]));
-                      case 3: return escaped.get(gatherBits<uint16_t, 4, 6, 6>(i[0], i[1], i[2]));
-                      case 4: return escaped.getSurrogates(gatherBits<uint32_t, 3, 6, 6, 6>(i[0], i[1], i[2], i[3]));
-                      }
-                                                            });
-                    writeAndAdvance(i, escapeSequence, codePointSize);
+                    writeAndAdvance(i, codePointSize, escaped.getForMultiByteUtf8(i, codePointSize));
                     break; // for (;;)
                   }
                   else if constexpr (escapeMode & ValidateUtf8) {
@@ -424,7 +426,7 @@ namespace minjson {
       void writePending(const char *i) {
         sink(std::string_view{ pendingBegin, static_cast<size_t>(i - pendingBegin) });
       }
-      void writeAndAdvance(const char *i, std::string_view escapeSequence, size_t inc) {
+      void writeAndAdvance(const char *i, size_t inc, std::string_view escapeSequence) {
         if (pendingBegin != i)
           writePending(i);
         pendingBegin = i + inc;
