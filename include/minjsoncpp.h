@@ -1370,8 +1370,17 @@ namespace minjson {
           }
         }
         double decimal;
-// libc++ version 19 and earlier does not implement std::from_chars() for double
-#if defined(_LIBCPP_VERSION) && _LIBCPP_VERSION < 200100
+#if !defined(_LIBCPP_VERSION) || _LIBCPP_VERSION >= 200100
+        const auto result = std::from_chars(begin, i, decimal);
+        if (result.ec == std::errc::result_out_of_range) {
+          addIssue(begin, "parsed number value is out of range"sv, ParsingIssue::Code::ParsedNumberOutOfRange);
+          return false;
+        }
+        else if (result.ec != std::errc{}) {
+          addIssue(result.ptr, "failed to parse number value"sv, ParsingIssue::Code::FailedToParseNumber);
+          return false;
+        }
+#else // libc++ version < 20 does not implement std::from_chars() for double
         char buf[1024];
         if (static_cast<size_t>(i - begin) > sizeof(buf) - 1) {
           addIssue(begin, "parsed number value is out of range"sv, ParsingIssue::Code::ParsedNumberOutOfRange);
@@ -1387,16 +1396,6 @@ namespace minjson {
         }
         if (bufEnd != buf + static_cast<size_t>(i - begin)) {
           addIssue(begin + (bufEnd - buf), "failed to parse number value"sv, ParsingIssue::Code::FailedToParseNumber);
-          return false;
-        }
-#else
-        const auto result = std::from_chars(begin, i, decimal);
-        if (result.ec == std::errc::result_out_of_range) {
-          addIssue(begin, "parsed number value is out of range"sv, ParsingIssue::Code::ParsedNumberOutOfRange);
-          return false;
-        }
-        else if (result.ec != std::errc{}) {
-          addIssue(result.ptr, "failed to parse number value"sv, ParsingIssue::Code::FailedToParseNumber);
           return false;
         }
 #endif
