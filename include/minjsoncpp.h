@@ -615,9 +615,8 @@ namespace minjson {
         sink(options.openingStringQuotation);
         const size_t escapedSize = impl::escape(sink, s, options.escape, options.validation, options.hexDigitsCase);
         if (options.validation == Utf8Validation::FailOnInvalidUtf8CodeUnits && escapedSize != s.size()) {
-          const size_t expectedCodePointSize = getExpectedUtf8CodePointSize(s[escapedSize]);
-          throw InvalidUtf8CodeUnitsError{ "string contains invalid UTF-8 code units",
-            s.substr(escapedSize, std::min(expectedCodePointSize, s.size() - escapedSize)), escapedSize };
+          const auto badCodeUnits = s.substr(escapedSize, getExpectedUtf8CodePointSize(s[escapedSize]));
+          throw InvalidUtf8CodeUnitsError{ "string contains invalid UTF-8 code units", badCodeUnits, escapedSize };
         }
         sink(options.closingStringQuotation);
       }
