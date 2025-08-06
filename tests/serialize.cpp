@@ -110,6 +110,29 @@ TEST_CASE("serialization formatting: indentation", "[serialize][formatting]") {
       }
     }
 
+    SECTION("108 spaces") {
+      minjson::SerializationOptions options;
+      options.indent = 108;
+
+      SECTION("array") {
+        const minjson::Value a = minjson::Array{ 1, 2, 3 };
+        CAPTURE(a);
+        CHECK(minjson::serializeToString(a, options) == R"([
+                                                                                                            1,
+                                                                                                            2,
+                                                                                                            3
+])"sv);
+      }
+
+      SECTION("object") {
+        const minjson::Value o = minjson::Object{ { "foo", "bar" } };
+        CAPTURE(o);
+        CHECK(minjson::serializeToString(o, options) == R"({
+                                                                                                            "foo":"bar"
+})"sv);
+      }
+    }
+
     SECTION("2 tabs") {
       minjson::SerializationOptions options;
       options.indent = 2;
@@ -140,6 +163,40 @@ TEST_CASE("serialization formatting: indentation", "[serialize][formatting]") {
         CAPTURE(nested2);
         CHECK(minjson::serializeToString(nested2, options) ==
               "[\n\t\t1,\n\t\t2,\n\t\t{\n\t\t\t\t\"foo\":\"bar\"\n\t\t}\n]"sv);
+      }
+    }
+
+    SECTION("111 tabs") {
+      minjson::SerializationOptions options;
+      options.indent = 111;
+      options.indentationChar = minjson::SerializationOptions::IndentationChar::Tab;
+
+      SECTION("array") {
+        const minjson::Value a = minjson::Array{ 1, 2, 3 };
+        CAPTURE(a);
+        CHECK(minjson::serializeToString(a, options) ==
+              "[\n"
+              "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t"
+              "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t"
+              "\t\t\t\t\t\t\t\t\t\t\t1,\n"
+              "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t"
+              "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t"
+              "\t\t\t\t\t\t\t\t\t\t\t2,\n"
+              "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t"
+              "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t"
+              "\t\t\t\t\t\t\t\t\t\t\t3\n"
+              "]"sv);
+      }
+
+      SECTION("object") {
+        const minjson::Value o = minjson::Object{ { "foo", "bar" } };
+        CAPTURE(o);
+        CHECK(minjson::serializeToString(o, options) ==
+              "{\n"
+              "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t"
+              "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t"
+              "\t\t\t\t\t\t\t\t\t\t\t\"foo\":\"bar\"\n"
+              "}"sv);
       }
     }
   }
