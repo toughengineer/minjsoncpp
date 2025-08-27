@@ -1,4 +1,4 @@
-﻿cmake_minimum_required(VERSION 3.8)
+﻿cmake_minimum_required(VERSION 3.8...3.10)
 
 set(TARGET_NAME "test")
 
@@ -61,7 +61,7 @@ foreach(file ${TEST_DATA})
   set(dst ${CMAKE_BINARY_DIR}/)
   add_custom_command(
     TARGET ${TARGET_NAME} POST_BUILD
-    COMMENT Copying ${src} to ${dst}
+    COMMENT "Copying ${src} to ${dst}"
     COMMAND ${CMAKE_COMMAND} -E copy ${src} ${dst}
   )
 endforeach()
