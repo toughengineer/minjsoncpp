@@ -64,17 +64,17 @@ git submodule update --init
 ```
 
 In your CMakeLists.txt you can just add include directory with something like this:
-```
+```cmake
 include_directories("thirdparty/minjsoncpp/include")
 ```
 Or you can add include directory for a particular CMake target (`${TARGET_NAME}` in this case):
-```
+```cmake
 target_include_directories(${TARGET_NAME} PRIVATE "thirdparty/minjsoncpp/include")
 ```
 In this case you don't need to explicitly add dependencies to the targets.
 
 Instead of explicitly adding include directory you can add a dependency to your CMake target:
-```
+```cmake
 target_link_libraries(${TARGET_NAME} minjsoncpp)
 
 add_subdirectory("thirdparty/minjsoncpp")
@@ -88,20 +88,21 @@ add_subdirectory("thirdparty/minjsoncpp")
 
 You can use [_FetchContent_](https://cmake.org/cmake/help/latest/module/FetchContent.html)
 to get the library via CMakeLists.txt:
-```
+```cmake
 include(FetchContent)
 
 FetchContent_Declare(
   minjsoncpp
   GIT_REPOSITORY https://github.com/toughengineer/minjsoncpp.git
   GIT_TAG main
+  GIT_SHALLOW TRUE
 )
 
 FetchContent_MakeAvailable(minjsoncpp)
 ```
 
 For your CMake target add:
-```
+```cmake
 target_link_libraries(${TARGET_NAME} minjsoncpp)
 ```
 where `${TARGET_NAME}` is the name of a CMake target like an executable or a library.
