@@ -1,10 +1,10 @@
+#include <climits>
+
 #include <minjsoncpp.h>
 
 #include "utils.h"
 
-#include <catch2/catch_all.hpp>
-
-#include <climits>
+#include "catch2/catch_amalgamated.hpp"
 
 using namespace std::string_view_literals;
 

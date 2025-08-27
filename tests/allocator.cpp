@@ -5,7 +5,7 @@
 
 #include "utils.h"
 
-#include <catch2/catch_all.hpp>
+#include "catch2/catch_amalgamated.hpp"
 
 #include <memory_resource>
 

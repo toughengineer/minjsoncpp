@@ -7,6 +7,7 @@ set(HEADERS
 )
 
 set(SOURCES
+  "Catch2/catch_amalgamated.cpp"
   "compile_time_checks.cpp"
   "value.cpp"
   "visit.cpp"
@@ -32,7 +33,6 @@ set(
 
 add_executable(${TARGET_NAME} ${SOURCES} ${HEADERS})
 target_include_directories(${TARGET_NAME} PUBLIC "../include")
-target_link_libraries(${TARGET_NAME} PUBLIC "Catch2::Catch2WithMain")
 
 set_target_properties(${TARGET_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
@@ -65,5 +65,3 @@ foreach(file ${TEST_DATA})
     COMMAND ${CMAKE_COMMAND} -E copy ${src} ${dst}
   )
 endforeach()
-
-add_subdirectory("Catch2")

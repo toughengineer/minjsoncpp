@@ -2,7 +2,7 @@
 
 #include "utils.h"
 
-#include <catch2/catch_all.hpp>
+#include "catch2/catch_amalgamated.hpp"
 
 using namespace std::string_view_literals;
 
@@ -41,19 +41,16 @@ TEST_CASE("visitation", "[visit]") {
 
   SECTION("array") {
     const minjson::Value v = minjson::Array{ 1, 2, 3 };
-    visit(Overloaded{ [](const minjson::Array &a) {
-                       REQUIRE(a == minjson::Array{ 1, 2, 3 });
-                     },
-                      [](auto &&) { FAIL(); } },
-          v);
+    visit(
+      Overloaded{ [](const minjson::Array &a) { REQUIRE(a == minjson::Array{ 1, 2, 3 }); }, [](auto &&) { FAIL(); } },
+      v);
   }
 
   SECTION("object") {
     const minjson::Value v = minjson::Object{ { "foo", "bar" }, { "baz", 42 } };
-    visit(Overloaded{ [](const minjson::Object &a) {
-                       REQUIRE(a == minjson::Object{ { "foo", "bar" }, { "baz", 42 } });
-                     },
-                      [](auto &&) { FAIL(); } },
-          v);
+    visit(
+      Overloaded{ [](const minjson::Object &a) { REQUIRE(a == minjson::Object{ { "foo", "bar" }, { "baz", 42 } }); },
+                  [](auto &&) { FAIL(); } },
+      v);
   }
 }
