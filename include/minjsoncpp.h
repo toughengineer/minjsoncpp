@@ -219,7 +219,7 @@ namespace minjson {
     } m_data;
 #endif
   };
-#if defined(_GLIBCXX_RELEASE) && _GLIBCXX_RELEASE < 12 && defined(__clang__)
+#if defined(_GLIBCXX_RELEASE) && _GLIBCXX_RELEASE < 12 && defined(__clang__) && __clang_major__ < 21
   static_assert(std::is_copy_constructible_v<BasicValue<std::allocator<char>>>); // for some reason clang needs this
 #endif
 
