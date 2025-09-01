@@ -7,7 +7,7 @@ set(HEADERS
 )
 
 set(SOURCES
-  "Catch2/catch_amalgamated.cpp"
+  "catch2/catch_amalgamated.cpp"
   "compile_time_checks.cpp"
   "value.cpp"
   "visit.cpp"
