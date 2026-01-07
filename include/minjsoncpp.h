@@ -1074,30 +1074,16 @@ namespace minjson {
         return detectEndOfInput();
       }
 
-      static constexpr std::string_view InvalidCharacterMessage = "invalid character";
-      bool matchCharacter(char c, std::string_view msg = InvalidCharacterMessage) {
-        if (*i == c)
-          return true;
-        addInvalidCharacterIssue(msg);
-        return false;
-      }
-      bool match(std::string_view pattern) {
-        ++i; // first char should already be matched
-        auto p = pattern.begin() + 1;
-        for (;;) {
-          if (detectEndOfInput() || !matchCharacter(*p))
-            return false;
-          ++i;
-          if (++p == pattern.end())
-            return true;
-        }
-      }
       template<typename T, T... value>
       bool parseLiteral(Variant &v, std::string_view pattern) {
-        if (match(pattern)) {
+        // first char should already be matched
+        const auto [e1, e2] = std::mismatch(i + 1, end, pattern.begin() + 1, pattern.end());
+        i = e1;
+        if (e2 == pattern.end()) { // pattern matched
           v.template emplace<T>(value...);
           return true;
         }
+        isInputEmpty() ? addUnexpectedEndOfInputIssue() : addInvalidCharacterIssue();
         return false;
       }
 
@@ -1257,6 +1243,12 @@ namespace minjson {
           }
         }
       }
+      bool matchCharacter(char c, std::string_view msg) {
+        if (*i == c)
+          return true;
+        addInvalidCharacterIssue(msg);
+        return false;
+      }
       bool parseObject(Variant &v) {
         ++i; // opening '{' is already matched
         if (detectEndOfInputAfterSkippingWhitespaces())
@@ -1409,7 +1401,7 @@ namespace minjson {
       void addIssue(const char *p, std::string_view description, ParsingIssue::Code code) {
         issues.push_back({ static_cast<size_t>(p - input.data()), description, code });
       }
-      void addInvalidCharacterIssue(std::string_view msg = InvalidCharacterMessage) {
+      void addInvalidCharacterIssue(std::string_view msg = "invalid character") {
         addIssue(i, msg, ParsingIssue::Code::InvalidCharacter);
       }
       bool checkInvalidUtf16SurrogateOptionAndEncode(String &s, uint32_t surrogate,
