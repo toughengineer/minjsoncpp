@@ -1016,9 +1016,9 @@ namespace minjson {
       size_t parsedSize() const { return static_cast<size_t>(i - input.data()); }
 
     protected:
-      bool isEmpty() const { return i == end; }
+      bool isInputEmpty() const { return i == end; }
       void skipDigits() {
-        while (!isEmpty() && isDecimalDigit(*i))
+        while (!isInputEmpty() && isDecimalDigit(*i))
           ++i;
       }
 
@@ -1063,7 +1063,7 @@ namespace minjson {
         return false;
       }
       bool detectEndOfInput() {
-        if (isEmpty()) {
+        if (isInputEmpty()) {
           addUnexpectedEndOfInputIssue();
           return true;
         }
@@ -1342,13 +1342,13 @@ namespace minjson {
         }
         bool isDecimal = false;
         // detecting fraction part
-        if (!isEmpty() && *i == '.') {
+        if (!isInputEmpty() && *i == '.') {
           if (advanceAndDetectEndOfInput() || !detectDigits()) // should be at least one digit after decimal point
             return false;
           isDecimal = true;
         }
         // detecting exponent part
-        if (!isEmpty() && (*i | '\x20') == 'e') {
+        if (!isInputEmpty() && (*i | '\x20') == 'e') {
           if (advanceAndDetectEndOfInput() ||
               (*i == '+' || *i == '-') && advanceAndDetectEndOfInput() ||
               !detectDigits())
