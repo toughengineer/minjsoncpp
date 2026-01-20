@@ -739,7 +739,7 @@ std::cout << '\n';
 You can read about terminal escape sequences e.g.
 [here](https://en.wikipedia.org/wiki/ANSI_escape_code#Fe_Escape_sequences)
 and about colors
-[here](https://en.wikipedia.org/wiki/ANSI_escape_code#SGR_(Select_Graphic_Rendition)_parameters).
+[here](https://en.wikipedia.org/wiki/ANSI_escape_code#Select_Graphic_Rendition_parameters).
 
 Output can look like this:
 
