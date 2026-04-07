@@ -95,8 +95,8 @@ namespace minjson {
       variant() = std::forward<T>(v); return *this;
     }
 
-    friend bool operator==(const BasicValue &a, const BasicValue &b) { return a.variant() == b.variant(); }
-    friend bool operator!=(const BasicValue &a, const BasicValue &b) { return a.variant() != b.variant(); }
+    [[nodiscard]] friend bool operator==(const BasicValue &a, const BasicValue &b) { return a.variant() == b.variant(); }
+    [[nodiscard]] friend bool operator!=(const BasicValue &a, const BasicValue &b) { return a.variant() != b.variant(); }
 
     [[nodiscard]] const Variant &variant() const& noexcept { return m_data; }
     [[nodiscard]] Variant &variant() & noexcept { return m_data; }
