@@ -912,7 +912,9 @@ template<typename String_t = std::string>
     escapeMode,
     validation,
     hexDigitsCase);
-  return unescapedSize == input.size() ? std::move(s) : String_t{};
+  if (unescapedSize == input.size())
+    return s;
+  return {};
 }
 ```
 This way `minjson::impl::escape()` function template is _always_ instantiated with parameter
